@@ -50,8 +50,8 @@ if [ $INSTALL_PG_SERVER = "True" ]; then
         echo -e "\n---- Install PostgreSQL Server ----"
         sudo apt-get install postgresql-$PG_VERSION -y
 
-        # Edit postgresql.conf to change listen address to '*':
-        sudo -u postgres sed -i "s/#listen_addresses = 'localhost'/listen_addresses = '*'/" "$PG_CONF"
+        # Edit postgresql.conf to change listen address to 'localhost':
+        sudo -u postgres sed -i "s/#listen_addresses = 'localhost'/listen_addresses = 'localhost'/" "$PG_CONF"
 
         # Edit postgresql.conf to change port to '$OE_DB_PORT':
         sudo -u postgres sed -i "s/port = 5432/port = $OE_DB_PORT/" "$PG_CONF"

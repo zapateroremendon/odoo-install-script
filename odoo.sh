@@ -2,35 +2,38 @@
 #--------------------------------------------------
 # Install Dependencies
 #--------------------------------------------------
-if [ $OE_VERSION = "10.0" ] || [ $OE_VERSION = "11.0" ] || [ $OE_VERSION = "12.0" ] || [ $OE_VERSION = "13.0" ] || [ $OE_VERSION = "14.0" ] || [ $OE_VERSION = "15.0" ]; then
+if [ $OE_VERSION = "15.0" ] || [ $OE_VERSION = "16.0" ] || [ $OE_VERSION = "17.0" ]; then
     OE_BIN="odoo-bin"
 else
-    OE_BIN="openerp-server"
+    echo "System has wrong Odoo version! Only supports Odoo 15+ versions"
+    exit 1
 fi
 
 echo -e "\n---- Python Dependencies ----"
 
 if [ $PYTHON_VERSION = "3" ]; then
 #----------------- Python 3 ------------------
-    if [ $(which python3.6) ] || [ $(which python3.7) ] || [ $(which python3.8) ] || [ $(which python3.9) ]; then
-        sudo apt-get install -y python3-pip python3-dev python3-setuptools python3-venv
+    if [ $(which python3.10) ] || [ $(which python3.11) ] || [ $(which python3.12) ]; then
+        sudo apt-get install -y python3-dev python3-pip python3-venv python3-setuptools python3-wheel
     else
-        echo "System has wrong python version! Odoo supports only 3.6+ python"
+        echo "System has wrong python version! Odoo supports only 3.10+ python"
         exit 1
     fi
     
 
 else
 #------------------ Python 2 -------------------
-    sudo apt-get install -y python-dev python-virtualenv python-setuptools python-pip
+    echo "System has wrong python version! Odoo supports only 3 python version"
+    exit 1
 fi
 
 echo -e "\n---- Odoo Web Dependencies ----"
 
 sudo apt-get install -y nodejs npm
+sudo ln -s /usr/bin/nodejs /usr/bin/node
+sudo npm install -g less less-plugin-clean-css
 sudo apt-get install -y node-less node-clean-css
 
-sudo npm install -g less less-plugin-clean-css
 
 #--------------------------------------------------
 # Install Wkhtmltopdf if needed
@@ -42,11 +45,12 @@ if [ $INSTALL_WKHTMLTOPDF = "True" ] && [ -z "$INSTALL_WKHTMLTOPDF_VERSION" ]; t
 
   OS_RELEASE=`lsb_release -sc`
   if [ "`getconf LONG_BIT`" == "64" ];then
-      _url=https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.5/wkhtmltox_0.12.5-1."$OS_RELEASE"_amd64.deb
+      _url=https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-3/wkhtmltox_0.12.6.1-3."$OS_RELEASE"_amd64.deb
   else
-      _url=https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.5/wkhtmltox_0.12.5-1."$OS_RELEASE"_i386.deb
+      echo "wkhtmltopdf is only for 64bit OS!"
   fi
   wget $_url
+  sudo apt-get install -y xfonts-75dpi xfonts-base fontconfig libxrender1 libjpeg-turbo8
   sudo dpkg -i `basename $_url`
   sudo apt-get install -f -y
 else
@@ -63,18 +67,22 @@ mkdir -p $OE_LOG_PATH
 if [ ! -d "$OE_REPO" ]; then
     echo -e "\n==== Installing ODOO Server ===="
     git clone --depth 1 --branch $OE_VERSION https://www.github.com/odoo/odoo $OE_REPO/
+
+    echo -e "\n---- Adding Themes code under $OE_HOME/themes ----"
+    mkdir -p $OE_REPO/themes
+    git clone --depth 1 --branch $OE_VERSION https://github.com/odoo/design-themes.git "$OE_REPO/themes"
 fi
 if [ ! -d "$OE_INSTALL_DIR/env" ]; then
     echo -e "* Create virtualenv"
     if [ $PYTHON_VERSION = "3" ]; then
         python3 -m venv $OE_INSTALL_DIR/env
     else
-        virtualenv $OE_INSTALL_DIR/env
+        echo "System has wrong python version! Odoo supports only 3 python version"
     fi
 fi
 
+sudo apt-get install -y libzip-dev libicu-dev libxml2-dev libssl-dev zlib1g-dev libxslt1-dev libldap2-dev libsasl2-dev libjpeg-dev libpq-dev libffi-dev libjpeg8-dev liblcms2-dev libblas-dev libatlas-base-dev
 source $OE_INSTALL_DIR/env/bin/activate
-sudo apt-get install libicu-dev libpq-dev libxml2-dev libxslt1-dev libsasl2-dev libldap2-dev libssl-dev zlib1g-dev -y
 pip install --upgrade pip
 
 if [[ -f $OE_REPO/requirements.txt ]]; then
@@ -82,22 +90,23 @@ if [[ -f $OE_REPO/requirements.txt ]]; then
     if [ $PYTHON_VERSION = "3" ]; then
         pip3 install -r $OE_REPO/requirements.txt
     else
-        pip install -r $OE_REPO/requirements.txt
+        echo "System has wrong python version! Odoo supports only 3 python version"
     fi
 fi
 
 if [ $IS_ENTERPRISE = "True" ]; then
     if [ ! -d "$OE_INSTALL_DIR/enterprise/addons" ]; then
         # Odoo Enterprise install!
-        mkdir -p $OE_INSTALL_DIR/enterprise/addons
+        mkdir -p $OE_REPO/ent_addons
 
-        echo -e "\n---- Adding Enterprise code under $OE_HOME/enterprise/addons ----"
-        git clone --depth 1 --branch $OE_VERSION https://www.github.com/odoo/enterprise "$OE_INSTALL_DIR/enterprise/addons"
+        echo -e "\n---- Adding Enterprise code under $OE_REPO/ent_addons ----"
+        git clone --depth 1 --branch $OE_VERSION https://www.github.com/odoo/enterprise "$OE_REPO/ent_addons"
     fi
 fi
-if [ ! -d "$OE_INSTALL_DIR/all_addons" ]; then
+if [ ! -d "$OE_REPO/cus_addons" ]; then
     echo -e "\n---- Create custom module directory ----"
-    mkdir -p $OE_INSTALL_DIR/all_addons
+    mkdir -p $OE_REPO/cus_addons
+    mkdir -p $OE_REPO/oca_addons
 fi
 
 if [ ! -f "$OE_CONFIG" ]; then
@@ -119,9 +128,9 @@ log_handler = ["[':INFO']"]
 xmlrpc = True
 xmlrpc_interface = 127.0.0.1
 xmlrpc_port = $OE_PORT
-netrpc = True
-netrpc_interface = 127.0.0.1
-netrpc_port = $OE_NETRPC_PORT
+# netrpc = False
+# netrpc_interface = 127.0.0.1
+# netrpc_port = $OE_NETRPC_PORT
 longpolling_port = $OE_LONGPOOL_PORT
 workers = $OE_WORKERS
 limit_time_cpu = 1200
