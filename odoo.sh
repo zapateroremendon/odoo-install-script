@@ -49,8 +49,8 @@ if [ $INSTALL_WKHTMLTOPDF = "True" ] && [ -z "$INSTALL_WKHTMLTOPDF_VERSION" ]; t
   else
       echo "wkhtmltopdf is only for 64bit OS!"
   fi
+  sudo apt-get install -y xfonts-75dpi xfonts-base fontconfig libjpeg-turbo8 libxrender1 xfonts-utils
   wget $_url
-  sudo apt-get install -y xfonts-75dpi xfonts-base fontconfig libxrender1 libjpeg-turbo8
   sudo dpkg -i `basename $_url`
   sudo apt-get install -f -y
 else

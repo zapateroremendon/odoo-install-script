@@ -24,7 +24,7 @@ OE_DB_HOST="localhost"
 OE_DB_PORT="5432"
 OE_DB_USER="odoo"
 OE_DB_PASSWORD="odoo"
-PG_VERSION=15
+PG_VERSION=14
 
 WEB_SERVER="nginx" # or "apache2"
 
