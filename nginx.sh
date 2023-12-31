@@ -42,13 +42,14 @@ server {
  access_log /var/log/nginx/$OE_INIT.access.log;
  error_log /var/log/nginx/$OE_INIT.error.log;
 
+ # Redirect websocket requests to odoo gevent port
+ location /websocket {
+  proxy_pass http://chat_$OE_WEBSERVER_HOST;
+ }
  # Redirect requests to odoo backend server
  location / {
-   proxy_redirect off;
-   proxy_pass http://$OE_WEBSERVER_HOST;
- }
- location /longpolling {
-     proxy_pass http://chat_$OE_WEBSERVER_HOST;
+  proxy_redirect off;
+  proxy_pass http://$OE_WEBSERVER_HOST;
  }
 
  # Specifies the maximum accepted body size of a client request,

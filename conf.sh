@@ -24,7 +24,7 @@ OE_DB_HOST="localhost"
 OE_DB_PORT="5432"
 OE_DB_USER="odoo"
 OE_DB_PASSWORD="odoo"
-PG_VERSION=14
+PG_VERSION=16
 
 WEB_SERVER="nginx" # or "apache2"
 
@@ -50,7 +50,7 @@ else
     OE_INIT="odoo-$OE_VERSION"
     OE_WEBSERV_CONF="odoo-$OE_VERSION.conf"
     OE_WEBSERVER_HOST="odoo$OE_VERSION"
-    OE_ADDONS_PATH="$OE_REPO/addons,$OE_REPO/themes,$OE_REPO/cus_addons,$OE_REPO/oca_addons"
+    OE_ADDONS_PATH="$OE_REPO/addons,$OE_REPO/themes,$OE_REPO/ent_addons,$OE_REPO/cus_addons,$OE_REPO/oca_addons"
     OE_LOG_PATH="$OE_INSTALL_DIR/logs/community"
     OE_TEXT="Community"
 fi

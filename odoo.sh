@@ -66,7 +66,7 @@ mkdir -p $OE_LOG_PATH
 #--------------------------------------------------
 if [ ! -d "$OE_REPO" ]; then
     echo -e "\n==== Installing ODOO Server ===="
-    git clone --depth 1 --branch $OE_VERSION https://www.github.com/odoo/odoo $OE_REPO/
+    git clone --depth 1 --branch $OE_VERSION --single-branch https://www.github.com/odoo/odoo $OE_REPO/
 
     echo -e "\n---- Adding Themes code under $OE_HOME/themes ----"
     mkdir -p $OE_REPO/themes
@@ -81,8 +81,8 @@ if [ ! -d "$OE_INSTALL_DIR/env" ]; then
     fi
 fi
 
-sudo apt-get install -y libzip-dev libicu-dev libxml2-dev libssl-dev zlib1g-dev libxslt1-dev libldap2-dev libsasl2-dev libjpeg-dev libpq-dev libffi-dev libjpeg8-dev liblcms2-dev libblas-dev libatlas-base-dev
 source $OE_INSTALL_DIR/env/bin/activate
+sudo apt-get install -y libzip-dev libicu-dev libxml2-dev libssl-dev zlib1g-dev libxslt1-dev libldap2-dev libsasl2-dev libjpeg-dev libpq-dev libffi-dev libjpeg8-dev liblcms2-dev libblas-dev libatlas-base-dev
 pip install --upgrade pip
 
 if [[ -f $OE_REPO/requirements.txt ]]; then
@@ -105,6 +105,7 @@ if [ $IS_ENTERPRISE = "True" ]; then
 fi
 if [ ! -d "$OE_REPO/cus_addons" ]; then
     echo -e "\n---- Create custom module directory ----"
+    mkdir -p $OE_REPO/ent_addons
     mkdir -p $OE_REPO/cus_addons
     mkdir -p $OE_REPO/oca_addons
 fi
@@ -128,9 +129,6 @@ log_handler = ["[':INFO']"]
 xmlrpc = True
 xmlrpc_interface = 127.0.0.1
 xmlrpc_port = $OE_PORT
-# netrpc = False
-# netrpc_interface = 127.0.0.1
-# netrpc_port = $OE_NETRPC_PORT
 longpolling_port = $OE_LONGPOOL_PORT
 workers = $OE_WORKERS
 limit_time_cpu = 1200
