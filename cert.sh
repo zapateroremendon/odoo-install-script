@@ -31,13 +31,13 @@ if [ $INSTALL_CERTIFICATE = "True" ] && [ ! -z "$DOMAIN_NAME" ]; then
         done
         if [ $WEB_SERVER = "apache2" ] ; then
             echo -e "Configuring certificate with Apache"
-            sudo apt-get install python-certbot-apache -y
+            sudo apt-get install python3-certbot-apache -y
             sudo certbot --apache $domains  --non-interactive --agree-tos --redirect -m $LE_EMAIL
         fi
 
         if [ $WEB_SERVER = "nginx" ] ; then
             echo -e "Configuring certificate with Nginx"
-            sudo apt-get install python-certbot-nginx -y
+            sudo apt-get install python3-certbot-nginx -y
             sudo certbot --nginx $domains  --non-interactive --agree-tos --redirect -m $LE_EMAIL
         fi
     fi
