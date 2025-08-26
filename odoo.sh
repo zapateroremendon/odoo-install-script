@@ -45,7 +45,12 @@ if [ $INSTALL_WKHTMLTOPDF = "True" ] && [ -z "$INSTALL_WKHTMLTOPDF_VERSION" ]; t
 
   OS_RELEASE=`lsb_release -sc`
   if [ "`getconf LONG_BIT`" == "64" ];then
-      _url=https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-3/wkhtmltox_0.12.6.1-3."$OS_RELEASE"_amd64.deb
+      # For Ubuntu Jammy (22.04) and Noble (24.04), use the specific jammy package
+      if [ "$OS_RELEASE" = "jammy" ] || [ "$OS_RELEASE" = "noble" ]; then
+          _url=https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-3/wkhtmltox_0.12.6.1-3.jammy_amd64.deb
+      else
+          _url=https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-3/wkhtmltox_0.12.6.1-3."$OS_RELEASE"_amd64.deb
+      fi
   else
       echo "wkhtmltopdf is only for 64bit OS!"
   fi
