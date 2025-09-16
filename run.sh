@@ -5,13 +5,6 @@
 #-------------------------------------------------------------------------------
 # This script will install Odoo on your Ubuntu 24.04 server. It can install multiple Odoo instances
 # in one Ubuntu because of the different xmlrpc_ports
-#-------------------------------------------------------------------------------
-# Make a new file:
-# nano odoo-install.sh
-# Place this content in it and then make the file executable:
-# chmod +x odoo-install.sh
-# Execute the script to install Odoo:
-# ./odoo-install
 ################################################################################
  
 if [[ $EUID -ne 0 ]]; then
